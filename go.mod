@@ -1,6 +1,6 @@
 module ossdeployer-action
 
-go 1.13
+go 1.18
 
 require (
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
