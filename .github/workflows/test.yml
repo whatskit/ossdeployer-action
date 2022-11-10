@@ -19,13 +19,13 @@ jobs:
       # load repo to /github/workspace
     - uses: actions/checkout@v2
       with:
-          repository: whatskit/blog
+          repository: fangbinwei/blog
           fetch-depth: 0
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install yarn@1.22.4 -g
+    - run: npm install yarn@1.22.19 -g
 
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
@@ -46,7 +46,7 @@ jobs:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
           bucket: whatskit-blog
-          endpoint: b.whatskit.cn
+          endpoint: example.billgo.me
           cname: true
           # folder in /github/workspace
           folder: .vuepress/dist
