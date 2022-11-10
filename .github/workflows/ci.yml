@@ -1,4 +1,4 @@
-name: deploy test
+name: build image
 
 on:
 # 支持手动触发
@@ -16,7 +16,6 @@ jobs:
             node-version: [14.x]
 
     steps:
-      # load repo to /github/workspace
     - uses: actions/checkout@v2
       with:
           repository: fangbinwei/blog
@@ -32,7 +31,7 @@ jobs:
       run: echo "::set-output name=dir::$(yarn cache dir)"
 
     - uses: actions/cache@v2
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      id: yarn-cache 
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
@@ -40,26 +39,25 @@ jobs:
           ${{ runner.os }}-yarn-
     - run: yarn install
     - run: yarn docs:build
-    - name: upload files to OSS
-      uses: whatskit/ossdeployer-action@master
-      with:
-          accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
-          accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
-          bucket: whatskit-blog
-          endpoint: example.billgo.me
-          cname: true
-          # folder in /github/workspace
-          folder: .vuepress/dist
-          htmlCacheControl: no-cache
-          imageCacheControl: max-age=864001
-          otherCacheControl: max-age=2592001
-          skipSetting: false
-          # not support recursive pattern **
-          exclude: |
-            CNAME
-            demo1/
-            demo2/*.md
-            demo2/*/*.md
+
+    # - name: upload files to OSS
+    #   uses: whatskit/ossdeployer-action@master
+    #   with:
+    #       accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
+    #       accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+    #       bucket: ossdeployer-action
+    #       endpoint: ossdeployer-action.billgo.me
+    #       cname: true
+    #       folder: .vuepress/dist
+    #       htmlCacheControl: no-cache
+    #       imageCacheControl: max-age=864001
+    #       otherCacheControl: max-age=2592001
+    #       skipSetting: false
+    #       exclude: |
+    #         CNAME
+    #         demo1/
+    #         demo2/*.md
+    #         demo2/*/*.md
 
 
   docker:
@@ -86,4 +84,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: whatskit/ossdeployer-action:latest
+          tags: nethost/ossdeployer-action:latest
