@@ -1,0 +1,89 @@
+name: deploy test
+
+on:
+# 支持手动触发
+  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+          matrix:
+            node-version: [14.x]
+
+    steps:
+      # load repo to /github/workspace
+    - uses: actions/checkout@v2
+      with:
+          repository: whatskit/blog
+          fetch-depth: 0
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install yarn@1.22.4 -g
+
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: yarn install
+    - run: yarn docs:build
+    - name: upload files to OSS
+      uses: whatskit/ossdeployer-action@master
+      with:
+          accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
+          accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+          bucket: whatskit-blog
+          endpoint: b.whatskit.cn
+          cname: true
+          # folder in /github/workspace
+          folder: .vuepress/dist
+          htmlCacheControl: no-cache
+          imageCacheControl: max-age=864001
+          otherCacheControl: max-age=2592001
+          skipSetting: false
+          # not support recursive pattern **
+          exclude: |
+            CNAME
+            demo1/
+            demo2/*.md
+            demo2/*/*.md
+
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: whatskit/ossdeployer-action:latest

@@ -1,0 +1,76 @@
+name: 'ossdeployer-action'
+description: 'Deploy your static website on aliyun OSS'
+author: 'Billgo <hi@billgo.me>'
+branding:
+  icon: 'upload'
+  color: 'gray-dark'
+inputs:
+  folder:
+    description: 'Folder which contains the website files'
+    required: true
+  exclude:
+    description: 'Exclude file from the folder'
+    required: false
+  accessKeyId:
+    description: 'Aliyun OSS accessKeyId.'
+    required: true
+  accessKeySecret:
+    description: 'Aliyun OSS accessKeySecret.'
+    required: true
+  bucket:
+    description: 'Aliyun OSS bucket instance.'
+    required: true
+  endpoint:
+    description: 'OSS region domain'
+    required: true
+  cname:
+    description: '`true` to identify the endpoint is your custom domain.'
+    required: false
+    default: 'false'
+  skipSetting:
+    description: '`true` to skip setting static pages related configuration. `indexPage`, `notFoundPage` will not be used.'
+    required: false
+    default: 'false'
+  incremental:
+    description: 'Save info of uploaded files to increase next upload speed'
+    required: false
+    default: 'true'
+  indexPage:
+    description: 'index page'
+    required: false
+    default: 'index.html'
+  notFoundPage:
+    description: 'not found page'
+    required: false
+    default: '404.html'
+  htmlCacheControl:
+    description: 'Cache-Control for HTML'
+    required: false
+    default: 'no-cache'
+  imageCacheControl:
+    description: 'Cache-Control for image'
+    required: false
+    default: 'max-age=864000'
+  otherCacheControl:
+    description: 'Cache-Control for other files'
+    required: false
+    default: 'max-age=2592000'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    ACCESS_KEY_ID: ${{ inputs.accessKeyId }}
+    ACCESS_KEY_SECRET: ${{ inputs.accessKeySecret }}
+    BUCKET: ${{ inputs.bucket }}
+    ENDPOINT: ${{ inputs.endpoint }}
+    CNAME: ${{ inputs.cname }}
+    FOLDER: ${{ inputs.folder }}
+    EXCLUDE: ${{ inputs.exclude }}
+    SKIP_SETTING: ${{ inputs.skipSetting }}
+    INCREMENTAL: ${{ inputs.incremental }}
+    INDEX_PAGE: ${{ inputs.indexPage }}
+    NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
+    HTML_CACHE_CONTROL: ${{ inputs.htmlCacheControl }}
+    IMAGE_CACHE_CONTROL: ${{ inputs.imageCacheControl }}
+    OTHER_CACHE_CONTROL: ${{ inputs.otherCacheControl }}
+    
